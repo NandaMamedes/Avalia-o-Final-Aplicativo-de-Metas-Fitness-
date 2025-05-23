@@ -20,7 +20,7 @@ import streamlit as st
 from datetime import datetime
 
 def conectar_banco():
-    return sqlite3.connect("BD_Passagens_Areas.db")
+    return sqlite3.connect("BD_Fitness.db")
 
 def criar_tabelas():
     conexao_fitness = conectar_banco()
@@ -177,22 +177,30 @@ def sistema(usuario_id, email):
         df_dietas = pd.read_sql("SELECT * FROM Dietas WHERE UsuarioID = ?", conexao_fitness, params=(id_usuario,))
         
     else:
-        st.subheader("1 - Informações Pessoais")
+        st.subheader("Informações Pessoais")
         nome = st.text_input("Digite seu nome:", placeholder="Seu nome aqui")
         idade = st.number_input("Idade:", min_value=0, max_value=120, value=25)
         sexo = st.selectbox("Sexo", ["Masculino", "Feminino", "Outro"])
         altura = st.slider("Altura (em metros):", 1.0, 2.5, 1.70)
         peso = st.slider("Peso (em Quilogramas):", 1.0, 2.5, 65)
         objetivo = st.selectbox("Objetivo", ["Ganhar massa muscular", "Perder massa"])
-        nivel_atividade = st.selectbox("Objetivo", ["Ganhar massa muscular", "Perder massa"])
-        metas = st.selectbox("Objetivo", ["Ganhar massa muscular", "Perder massa"])
+        nivel_atividade = st.selectbox("Nível de Atividade", ["Ativo", "Moderado", "Sedentario"])
+        metas = st.text_input("Metas específicas")
         data_referencia = st.date_input("🗕️ Data de referência dos dados")
         mes_ano = data_referencia.strftime("%m/%Y")
         
         if st.button("Continuar"):
-            st.subheader("Escolha o método de pagamento:")
-            metodo = st.radio("", ["Cartão", "Boleto", "Pix"], horizontal=True)
-            with col1:
+            st.subheader("Realizar Exercício ou Dieta:")
+            modo = st.radio("", ["Exercício", "Dieta"], horizontal=True)
+            if modo == "Exercício":
+                st.subheader("🧾 Pagamento com Boleto")
+            cpf = st.text_input("CPF do Sacado", placeholder="xxx.xxx.xxx-xx")
+            nome = st.text_input("Nome do Sacado")
+            vencimento = st.text_input("Data de Vencimento (DD/MM/AAAA)")
+            descricao = st.text_input("Descrição")
+            valor = st.number_input("Valor", min_value=0.01, step=0.01)
+
+            if st.button("🧾 Gerar Boleto"):
                 st.subheader("2 - Informações Financeiras")
             renda_mensal = st.number_input("Renda mensal (R$):", min_value=0.0, step=0.01)
             gastos_moradia = st.number_input("Gastos com moradia (R$):", min_value=0.0, step=0.01)
@@ -210,6 +218,7 @@ def validar_email(email):
     if "@" not in email or "." not in email.split("@")[-1]:
         return False, "E-mail inválido"
     return True, ""
+
 
 st.set_page_config(page_title="🏋️‍♂️ Metas Fitness", layout="wide")
 st.title("Fitness MaMaJu")
