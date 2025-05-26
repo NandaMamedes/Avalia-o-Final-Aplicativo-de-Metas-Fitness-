@@ -1,6 +1,4 @@
-print('oi')
-print('oi')
-print('oi')
+# python -m streamlit run Avaliação_Final_POO.py
 
 # Avaliação Final - POO
 
@@ -324,6 +322,7 @@ if not st.session_state.logado:
                     st.session_state.usuario_id = novo_usuario[0]
                     st.success("✅ Cadastro realizado!")
                     st.rerun()
+
 else:
     sistema(st.session_state.email_usuario)
 #oiiiiiiiiiiiii
