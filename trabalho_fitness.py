@@ -22,6 +22,7 @@ def conectar_banco():
 
 def criar_tabelas():
     # Momento Banco de Dados SQLite - Fernanda
+    
     # Manter tabela Cadastros para Login e manter atributos da tabela Usuarios (ID até Peso)
     # Hoje é dia de pastel
 
