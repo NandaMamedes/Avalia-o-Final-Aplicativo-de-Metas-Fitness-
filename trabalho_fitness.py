@@ -1,5 +1,7 @@
 # Avaliação Final - POO
 
+# python -m streamlit run trabalho_fitness.py
+
 # Tema:
 
 # 4. Aplicativo de Metas Fitness
@@ -327,4 +329,3 @@ if not st.session_state.logado:
 
 else:
     sistema(st.session_state.email_usuario)
-#oiiiiiiiiiiiii
