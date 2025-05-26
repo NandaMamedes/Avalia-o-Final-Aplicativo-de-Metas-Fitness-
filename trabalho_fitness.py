@@ -247,7 +247,7 @@ def validar_email(email):
 
 # Interface
 st.set_page_config("🏋️‍♀️ Metas Fitness", layout="wide")
-st.title("🏋️ Fitness MaMaJu")
+st.title("🏋️ FitLife")
 st.caption("Acompanhe sua rotina de exercícios e dieta.")
 st.markdown("---")
 
