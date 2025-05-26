@@ -8,7 +8,8 @@ def conectar_banco():
 
 def criar_tabelas():
     # Manter tabela Cadastros para Login e manter atributos da tabela Usuarios (ID até Peso)
-    
+    # Hoje é dia de pastel
+
     conexao = conectar_banco()
     cursor = conexao.cursor()
 
