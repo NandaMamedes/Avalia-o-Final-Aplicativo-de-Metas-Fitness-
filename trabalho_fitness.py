@@ -1,10 +1,3 @@
-<<<<<<< Updated upstream
-# python -m streamlit run Avaliação_Final_POO.py
-=======
-print('oi')
-print('oi')
->>>>>>> Stashed changes
-
 # Avaliação Final - POO
 
 # Tema:
