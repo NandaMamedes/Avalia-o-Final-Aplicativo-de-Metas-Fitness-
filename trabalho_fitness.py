@@ -1,3 +1,19 @@
+print('oi')
+print('oi')
+print('oi')
+
+# Avaliação Final - POO
+
+# Tema:
+
+# 4. Aplicativo de Metas Fitness
+
+# Objetivo: Crie uma aplicação que monitore exercícios e dietas.
+
+# ● Classes: Usuario, Exercicio, Dieta.
+# ● Features: calcular calorias, progresso semanal, etc
+# ● Extra: Dashboard com gráficos
+
 import hashlib
 import sqlite3
 import pandas as pd
@@ -310,3 +326,4 @@ if not st.session_state.logado:
                     st.rerun()
 else:
     sistema(st.session_state.email_usuario)
+#oiiiiiiiiiiiii
