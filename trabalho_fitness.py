@@ -1,5 +1,7 @@
 # Avaliação Final - POO
 
+# python -m streamlit run trabalho_fitness.py
+
 # Tema:
 
 # 4. Aplicativo de Metas Fitness
@@ -20,6 +22,7 @@ def conectar_banco():
 
 def criar_tabelas():
     # Momento Banco de Dados SQLite - Fernanda
+    
     # Manter tabela Cadastros para Login e manter atributos da tabela Usuarios (ID até Peso)
     # Hoje é dia de pastel
 
@@ -327,4 +330,3 @@ if not st.session_state.logado:
 
 else:
     sistema(st.session_state.email_usuario)
-#oiiiiiiiiiiiii
