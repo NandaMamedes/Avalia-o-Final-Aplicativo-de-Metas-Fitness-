@@ -23,6 +23,9 @@ def conectar_banco():
     return sqlite3.connect("BD_Fitness.db")
 
 def criar_tabelas():
+    # Manter tabela Cadastros para Login e manter atributos da tabela Usuarios (ID até Peso)
+    # Hoje é dia de pastel
+
     conexao = conectar_banco()
     cursor = conexao.cursor()
 
@@ -260,7 +263,7 @@ def validar_email(email):
 
 # Interface
 st.set_page_config("🏋️‍♀️ Metas Fitness", layout="wide")
-st.title("🏋️ Fitness MaMaJu")
+st.title("🏋️ FitLife")
 st.caption("Acompanhe sua rotina de exercícios e dieta.")
 st.markdown("---")
 
