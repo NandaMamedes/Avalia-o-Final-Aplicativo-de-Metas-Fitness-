@@ -20,7 +20,7 @@ import pandas as pd
 import streamlit as st
 
 def conectar_banco():
-    return sqlite3.connect("BD_Fitness.db")
+    return sqlite3.connect("fitness.db")
 
 def criar_tabelas():
     # Manter tabela Cadastros para Login e manter atributos da tabela Usuarios (ID até Peso)
