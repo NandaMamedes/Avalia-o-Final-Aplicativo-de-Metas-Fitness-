@@ -7,6 +7,8 @@ def conectar_banco():
     return sqlite3.connect("BD_Fitness.db")
 
 def criar_tabelas():
+    # Manter tabela Cadastros para Login e manter atributos da tabela Usuarios (ID até Peso)
+    
     conexao = conectar_banco()
     cursor = conexao.cursor()
 
