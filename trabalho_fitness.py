@@ -21,6 +21,7 @@ def conectar_banco():
     return sqlite3.connect("fitness.db")
 
 def criar_tabelas():
+    # Momento Banco de Dados SQLite - Fernanda
     # Manter tabela Cadastros para Login e manter atributos da tabela Usuarios (ID até Peso)
     # Hoje é dia de pastel
 
@@ -178,6 +179,8 @@ def sistema(email):
         st.markdown("---")
         st.header("📊 Seus últimos resultados")
 
+        # Momento Dashboard ou Métricas - Jucilene
+
         df_exercicios = pd.read_sql("SELECT * FROM Exercicios WHERE Usuario_ID = ?", conectar_banco(), params=(id_usuario,))
         st.dataframe(df_exercicios)
 
@@ -259,7 +262,8 @@ def sistema(email):
 def validar_email(email):
     return "@" in email and "." in email.split("@")[-1]
 
-# Interface
+# Momento Streamlit - Andrei
+
 st.set_page_config("🏋️‍♀️ Metas Fitness", layout="wide")
 st.title("🏋️ FitLife")
 st.caption("Acompanhe sua rotina de exercícios e dieta.")
