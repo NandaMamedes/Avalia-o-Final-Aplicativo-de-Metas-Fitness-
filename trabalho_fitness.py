@@ -24,7 +24,6 @@ def criar_tabelas():
     # Momento Banco de Dados SQLite - Fernanda
     
     # Manter tabela Cadastros para Login e manter atributos da tabela Usuarios (ID até Peso)
-    # Hoje é dia de pastel
 
     conexao = conectar_banco()
     cursor = conexao.cursor()
@@ -183,10 +182,16 @@ def sistema(email):
         # Momento Dashboard ou Métricas - Jucilene
 
         df_exercicios = pd.read_sql("SELECT * FROM Exercicios WHERE Usuario_ID = ?", conectar_banco(), params=(id_usuario,))
-        st.dataframe(df_exercicios)
+        if df_exercicios.empty:
+            st.warning("Nenhum resultado dos seus exercícios ainda!")
+        else:
+            st.dataframe(df_exercicios)
 
         df_dietas = pd.read_sql("SELECT * FROM Dietas WHERE Usuario_ID = ?", conectar_banco(), params=(id_usuario,))
-        st.dataframe(df_dietas)
+        if df_dietas.empty:
+            st.warning("Nenhum resultado das suas dietas ainda!")
+        else:
+            st.dataframe(df_dietas)
 
         usuario = Usuario(cadastro_id, nome, idade, sexo, altura, peso, objetivo, nivel_atividade, metas)
 
@@ -214,7 +219,7 @@ def sistema(email):
             st.rerun()
 
     st.markdown("---")
-    st.subheader("Registrar nova atividade")
+    st.subheader("Registrar atividade")
     modo = st.radio("Categoria:", ["Exercício", "Dieta"], horizontal=True)
 
     if modo == "Exercício":
