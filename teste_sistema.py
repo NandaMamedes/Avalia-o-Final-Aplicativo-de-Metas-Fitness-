@@ -155,15 +155,33 @@ class Dieta:
 
     def calcular_calorias_diarias(self):
         try:
-            # Ganhar massa
-            if self.objetivo == "Ganhar massa muscular":
+            #Low Carb
+            if self.objetivo == "Ganhar massa muscular" and self.tipo_dieta == "Low Carb":
+                return {"Proteínas": 1800, "Carboidratos": 1600, "Gorduras": 2000}.get(self.macronutrientes, 1600)
+            elif self.objetivo == "Perder gordura" and self.tipo_dieta == "Low Carb":
+                return {"Proteínas": 1400, "Carboidratos": 1300, "Gorduras": 1500}.get(self.macronutrientes, 1300) 
+                
+            # Cetogênica
+            elif self.objetivo == "Ganhar massa muscular" and self.tipo_dieta == "Cetogênica":
                 return {"Proteínas": 2000, "Carboidratos": 1800, "Gorduras": 2200}.get(self.macronutrientes, 2200)
-            # Perder gordura
-            elif self.objetivo == "Perder gordura":
-                return {"Proteínas": 1500, "Carboidratos": 1300, "Gorduras": 1800}.get(self.macronutrientes, 1300)     
+            elif self.objetivo == "Perder gordura" and self.tipo_dieta == "Cetogênica":
+                return {"Proteínas": 1500, "Carboidratos": 1400, "Gorduras": 1600}.get(self.macronutrientes, 1400)   
+              
+            # Vegana
+            elif self.objetivo == "Ganhar massa muscular" and self.tipo_dieta == "Vegana":
+                return {"Proteínas": 2000, "Carboidratos": 1800, "Gorduras": 2200}.get(self.macronutrientes, 1800)
+            elif self.objetivo == "Perder gordura" and self.tipo_dieta == "Vegana":
+                return {"Proteínas": 1500, "Carboidratos": 1300, "Gorduras": 1800}.get(self.macronutrientes, 1300)  
+               
+            # Vegetariana
+            elif self.objetivo == "Ganhar massa muscular" and self.tipo_dieta == "Vegetariana":
+                return {"Proteínas": 1900, "Carboidratos": 1800, "Gorduras": 2100}.get(self.macronutrientes, 1800)
+            elif self.objetivo == "Perder gordura" and self.tipo_dieta == "Vegetariana":
+                return {"Proteínas": 1600, "Carboidratos": 1500, "Gorduras": 1800}.get(self.macronutrientes, 1500)     
+            
             # Manter forma
             elif self.objetivo == "Manter forma":
-                return {"Proteínas": 1350, "Carboidratos": 1800, "Gorduras": 1500}.get(self.macronutrientes, 1500)
+                return {"Proteínas": 1350, "Carboidratos": 1800, "Gorduras": 1500}.get(self.macronutrientes, 1800)
                 
         except Exception as erro:
             print(f"Erro ao calcular calorias diárias: {erro}")
@@ -630,41 +648,43 @@ def sistema_exercicio(id_usuario, peso):
                     st.rerun()
 
 
-def sistema_dieta(id_usuario, objetivo):
-    st.header("🥗 Registro de Dieta")
-    nome_dieta = st.text_input("Nome da dieta")
-    tipo_dieta = st.selectbox("Tipo", ["Low Carb", "Cetogênica", "Vegana", "Vegetariana"])
-    macronutrientes = st.selectbox("Macronutrientes", ["Proteínas", "Carboidratos", "Gorduras"])
-    data = st.date_input("Data da dieta")
-    dieta = Dieta(id_usuario, nome_dieta, tipo_dieta, None, macronutrientes, objetivo)
-    calorias = dieta.calcular_calorias_diarias()
-
-    if calorias:
-        st.info(f"Calorias diárias estimadas: {calorias}")
-
-    if st.button("Salvar Dieta"):
-        if not nome_dieta:
-            st.warning("Preencha todos os campo!")
-        else:
-            with conectar_banco() as conexao:
-                cursor = conexao.cursor()
-                cursor.execute('''
-                    INSERT INTO Dietas (Usuario_ID, Nome_Dieta, Tipo_Dieta, Calorias_Diarias, Macronutrientes, Data_Dieta)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                    ''', (id_usuario, nome_dieta, tipo_dieta, calorias, macronutrientes, data.strftime("%d/%m/%Y")))
-                    
-                st.success("✅ Dieta registrada!")
-                novo_peso = dieta.novo_peso_dieta(calorias)
+def sistema_dieta(id_usuario):
+    with conectar_banco() as conexao:
+        cursor = conexao.cursor()
+        st.header("🥗 Registro de Dieta")
+        nome_dieta = st.text_input("Nome da dieta")
+        tipo_dieta = st.selectbox("Tipo", ["Low Carb", "Cetogênica", "Vegana", "Vegetariana"])
+        macronutrientes = st.selectbox("Macronutrientes", ["Proteínas", "Carboidratos", "Gorduras"])
+        data = st.date_input("Data da dieta")
+        cursor.execute("SELECT Objetivo FROM Usuarios WHERE ID = ?", (id_usuario,))
+        objetivo_usuario = cursor.fetchone()[0]
+        dieta = Dieta(id_usuario, nome_dieta, tipo_dieta, None, macronutrientes, objetivo_usuario)
+        calorias = dieta.calcular_calorias_diarias()
         
-                if novo_peso:
-                    cursor.execute("UPDATE Usuarios SET Peso = ? WHERE ID = ?", (novo_peso, id_usuario))
-
-                    cursor.execute("SELECT Nome FROM Usuarios WHERE ID = ?", (id_usuario,))
-                    nome_usuario = cursor.fetchone()[0]
-
-                    cursor.execute("INSERT INTO Historico_Peso (Usuario_ID, Nome_Usuario, Peso, Data_Peso) VALUES (?, ?, ?, ?)", (id_usuario, nome_usuario, novo_peso, data))
-                    conexao.commit()
-                    st.rerun()
+        if calorias:
+            st.info(f"Calorias diárias estimadas: {calorias}")
+            
+        if st.button("Salvar Dieta"):
+                if not nome_dieta:
+                    st.warning("Preencha todos os campo!")
+                else:
+                    cursor.execute('''
+                        INSERT INTO Dietas (Usuario_ID, Nome_Dieta, Tipo_Dieta, Calorias_Diarias, Macronutrientes, Data_Dieta)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                        ''', (id_usuario, nome_dieta, tipo_dieta, calorias, macronutrientes, data.strftime("%d/%m/%Y")))
+                    
+                    st.success("✅ Dieta registrada!")
+                    novo_peso = dieta.novo_peso_dieta(calorias)
+                    
+                    if novo_peso:
+                        cursor.execute("UPDATE Usuarios SET Peso = ? WHERE ID = ?", (novo_peso, id_usuario))
+                        
+                        cursor.execute("SELECT Nome FROM Usuarios WHERE ID = ?", (id_usuario,))
+                        nome_usuario = cursor.fetchone()[0]
+                        
+                        cursor.execute("INSERT INTO Historico_Peso (Usuario_ID, Nome_Usuario, Peso, Data_Peso) VALUES (?, ?, ?, ?)", (id_usuario, nome_usuario, novo_peso, data))
+                        conexao.commit()
+                        st.rerun()
 
 
 def sistema(email):
@@ -689,12 +709,27 @@ def sistema(email):
         st.metric("Seu IMC", usuario_obj.calcular_imc())
         st.markdown("---")
 
+        st.text(f"Deseja mudar seu objetivo?\nObjetivo escolhido anteriormente: {objetivo}")
+        modo_objetivo = st.radio("Escolha:", ["Não", "Sim"])
+        
+        if modo_objetivo == "Sim":
+            novo_objetivo = st.selectbox(
+                "Novo Objetivo", 
+                ["Ganhar massa muscular", "Perder gordura", "Manter forma"]
+                )
+            cursor.execute(
+                "UPDATE Usuarios SET Objetivo = ? WHERE ID = ?", (novo_objetivo, id_usuario))
+            conexao.commit()
+            st.success("✅ Objetivo atualizado com sucesso!")
+            objetivo_atual = novo_objetivo
+            st.text(f"Objetivo atual: {objetivo_atual}")
+
         st.subheader("Registrar Atividade")
         modo = st.radio("Escolha:", ["Exercício", "Dieta"], horizontal=True)
         if modo == "Exercício":
             sistema_exercicio(id_usuario, peso)
         elif modo == "Dieta":
-            sistema_dieta(id_usuario, objetivo)
+            sistema_dieta(id_usuario)
 
         analise_dados(id_usuario)
 
