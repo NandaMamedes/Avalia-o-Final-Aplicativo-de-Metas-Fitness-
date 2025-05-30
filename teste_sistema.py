@@ -550,6 +550,7 @@ def sistema_exercicio(id_usuario, peso):
                     INSERT INTO Exercicios (Usuario_ID, Nome_Exercicio, Tipo_Exercicio, Duracao, Intensidade, Calorias_Queimadas, Data_Exercicio)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
                     ''', (id_usuario, nome_ex, tipo_ex, duracao, intensidade, calorias, data.strftime("%d/%m/%Y")))
+                st.success("✅ Exercício registrado!")
                 novo_peso = exercicio.novo_peso_exercicio()
                     
                 if novo_peso:
@@ -560,7 +561,6 @@ def sistema_exercicio(id_usuario, peso):
 
                     cursor.execute("INSERT INTO Historico_Peso (Usuario_ID, Nome_Usuario, Peso, Data_Peso) VALUES (?, ?, ?, ?)", (id_usuario, nome_usuario, novo_peso, data))
                     conexao.commit()
-                    st.success("✅ Exercício registrado!")
                     st.rerun()
 
 
@@ -587,6 +587,7 @@ def sistema_dieta(id_usuario, objetivo):
                     VALUES (?, ?, ?, ?, ?, ?)
                     ''', (id_usuario, nome_dieta, tipo_dieta, calorias, macronutrientes, data.strftime("%d/%m/%Y")))
                     
+                st.success("✅ Dieta registrada!")
                 novo_peso = dieta.novo_peso_dieta()
         
                 if novo_peso:
@@ -597,7 +598,6 @@ def sistema_dieta(id_usuario, objetivo):
 
                     cursor.execute("INSERT INTO Historico_Peso (Usuario_ID, Nome_Usuario, Peso, Data_Peso) VALUES (?, ?, ?, ?)", (id_usuario, nome_usuario, novo_peso, data))
                     conexao.commit()
-                    st.success("✅ Dieta registrada!")
                     st.rerun()
 
 
