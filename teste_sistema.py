@@ -77,6 +77,7 @@ def criar_tabelas():
                 ID INTEGER PRIMARY KEY AUTOINCREMENT,
                 Usuario_ID INTEGER,
                 Nome_Usuario TEXT NOT NULL,
+                imc REAL NOT NULL,
                 Peso REAL NOT NULL,
                 Data_Peso TEXT NOT NULL,
                 FOREIGN KEY (Usuario_ID) REFERENCES Usuarios(ID)
@@ -116,12 +117,13 @@ class Usuario:
             return None
 
 class Exercicio:
-    def __init__(self, usuario_id, nome_exercicio, tipo_exercicio, duracao, intensidade):
+    def __init__(self, usuario_id, nome_exercicio, tipo_exercicio, duracao, intensidade, objetivo):
         self.usuario_id = usuario_id
         self.nome_exercicio = nome_exercicio
         self.tipo_exercicio = tipo_exercicio
         self.duracao = duracao
         self.intensidade = intensidade
+        self.objetivo = objetivo
         self.calorias_queimadas = 0
 
     def calcular_calorias_queimadas(self, peso):
@@ -138,8 +140,33 @@ class Exercicio:
                 cursor.execute("SELECT Peso FROM Usuarios WHERE ID = ?", (self.usuario_id,))
                 peso_atual = cursor.fetchone()
                 if peso_atual:
-                    novo_peso = peso_atual[0] - (self.calorias_queimadas / 7700)
-                    return round(novo_peso, 2)
+                    # Força
+                    if self.objetivo == "Ganhar massa muscular":
+                        if self.tipo_exercicio == "Força":
+                            novo_peso = peso_atual[0] + (self.calorias_queimadas / 8800)
+                            return round(novo_peso, 2)
+                        else:
+                            novo_peso = peso_atual[0] + (self.calorias_queimadas / 7700)
+                            return round(novo_peso, 2)
+                    
+                    # Cardio
+                    elif self.objetivo == "Perder gordura":
+                        if self.tipo_exercicio == "Cardio":
+                            novo_peso = peso_atual[0] - (self.calorias_queimadas / 8800)
+                            return round(novo_peso, 2)
+                        else:
+                            novo_peso = peso_atual[0] - (self.calorias_queimadas / 7700)
+                            return round(novo_peso, 2)
+                        
+                    # Flexibilidade e Outro
+                    elif self.objetivo == "Manter forma":
+                        if self.tipo_exercicio == "Flexibilidade" or "Outro":
+                            novo_peso = peso_atual[0] + (self.calorias_queimadas / 7700) - (self.calorias_queimadas / 5500)
+                            return round(novo_peso, 2)
+                        else:
+                            novo_peso = peso_atual[0] + (self.calorias_queimadas / 8800) - (self.calorias_queimadas / 5500)
+                            return round(novo_peso, 2)
+
         except Exception as erro:
             print(f"Erro ao calcular novo peso: {erro}")
             return None
@@ -501,38 +528,63 @@ def analise_dados(id_usuario):
             
         with tab2:
             modo_graficos = st.radio("Escolha Tipo de Gráfico:", ["Evolução do Peso", "Tipos de Exercícios mais escolhidos", "Tipos de Dietas mais escolhidos", "Macronutrientes mais consumidos"], horizontal=True)
-            
+
             if modo_graficos == "Evolução do Peso":
                 # Gráfico de Linha - Evolução do Peso
-                
-                df_linha_tempo = pd.read_sql_query(
+                df_peso = pd.read_sql_query(
                     "SELECT Data_Peso, Peso FROM Historico_Peso WHERE Usuario_ID = ? ORDER BY Data_Peso",conexao,params=(id_usuario,))
-                
-                if df_linha_tempo.empty:
+                    
+                if df_peso.empty:
                     st.info("📭 Nenhum dado de peso registrado no histórico ainda.")
                     return
-                
-                df_linha_tempo["Data_Peso"] = pd.to_datetime(df_linha_tempo["Data_Peso"], dayfirst=True, errors="coerce")
-                
-                df_linha_tempo = df_linha_tempo.sort_values(by="Data_Peso")
-                
+                    
+                df_peso["Data_Peso"] = pd.to_datetime(df_peso["Data_Peso"], dayfirst=True, errors="coerce")
+                df_peso = df_peso.sort_values(by="Data_Peso")
+                    
                 fig = px.line(
-                    df_linha_tempo,
+                    df_peso,
                     x="Data_Peso",
                     y="Peso",
                     title="Evolução do Peso",
                     markers=True
                     )
-                
+                    
                 fig.update_layout(
                     xaxis_title="Data",
                     yaxis_title="Peso (kg)",
                     hovermode="x unified",
                     template="plotly_white"
                     )
-                
                 st.plotly_chart(fig, use_container_width=True)
-            
+                st.markdown("---")
+                    
+                # Gráfico de Linha - Evolução do IMC
+                df_imc = pd.read_sql_query(
+                    "SELECT Data_Peso, imc FROM Historico_Peso WHERE Usuario_ID = ? ORDER BY Data_Peso",conexao,params=(id_usuario,))
+                    
+                if df_imc.empty:
+                    st.info("📭 Nenhum dado de IMC registrado no histórico ainda.")
+                    return
+                    
+                df_imc["Data_Peso"] = pd.to_datetime(df_imc["Data_Peso"], dayfirst=True, errors="coerce")
+                df_imc = df_imc.sort_values(by="Data_Peso")
+
+                fig = px.line(
+                    df_imc,
+                    x="Data_Peso",
+                    y="imc",  
+                    title="Evolução do IMC",
+                    markers=True
+                    )
+                    
+                fig.update_layout(
+                    xaxis_title="Data",
+                    yaxis_title="IMC",
+                    hovermode="x unified",
+                    template="plotly_white"
+                    )
+                st.plotly_chart(fig, use_container_width=True)
+
             elif modo_graficos == "Tipos de Exercícios mais escolhidos":
                 # Gráficos de Pizza - Tipo de Exercicios mais escolhidos
                 
@@ -615,20 +667,30 @@ def analise_dados(id_usuario):
 
 
 def sistema_exercicio(id_usuario, peso):
-    st.header("🏋️ Registro de Exercício")
-    nome_ex = st.text_input("Nome do exercício")
-    tipo_ex = st.selectbox("Tipo", ["Cardio", "Força", "Flexibilidade", "Outro"])
-    duracao = st.number_input("Duração (minutos)", 1, 300)
-    intensidade = st.selectbox("Intensidade", ["Leve", "Moderada", "Intensa"])
-    data = st.date_input("Data do exercício")
-    exercicio = Exercicio(id_usuario, nome_ex, tipo_ex, duracao, intensidade)
-    calorias = exercicio.calcular_calorias_queimadas(peso)
+    with conectar_banco() as conexao:
+        cursor = conexao.cursor()
 
-    if st.button("Salvar Exercício"):
-        if not nome_ex:
-            st.warning("Preencha todos os campos obrigatórios!")
-        else:
-            with conectar_banco() as conexao:
+        cursor.execute('''SELECT Cadastro_ID, Nome, Idade, Sexo, Altura, Peso, Objetivo, Nivel_Atividade, Metas
+                          FROM Usuarios WHERE ID = ?''', (id_usuario,))
+        usuario = cursor.fetchone()
+
+        cadastro_id, nome, idade, sexo, altura, peso, objetivo, nivel_atividade, metas = usuario
+
+        st.header("🏋️ Registro de Exercício")
+        nome_ex = st.text_input("Nome do exercício")
+        tipo_ex = st.selectbox("Tipo", ["Cardio", "Força", "Flexibilidade", "Outro"])
+        duracao = st.number_input("Duração (minutos)", 1, 300)
+        intensidade = st.selectbox("Intensidade", ["Leve", "Moderada", "Intensa"])
+        cursor.execute("SELECT Objetivo FROM Usuarios WHERE ID = ?", (id_usuario,))
+        objetivo_usuario = cursor.fetchone()[0]
+        data = st.date_input("Data do exercício")
+        exercicio = Exercicio(id_usuario, nome_ex, tipo_ex, duracao, intensidade, objetivo_usuario)
+        calorias = exercicio.calcular_calorias_queimadas(peso)
+        
+        if st.button("Salvar Exercício"):
+            if not nome_ex:
+                st.warning("Preencha todos os campos obrigatórios!")
+            else:
                 cursor = conexao.cursor()
                 cursor.execute('''
                     INSERT INTO Exercicios (Usuario_ID, Nome_Exercicio, Tipo_Exercicio, Duracao, Intensidade, Calorias_Queimadas, Data_Exercicio)
@@ -643,7 +705,10 @@ def sistema_exercicio(id_usuario, peso):
                     cursor.execute("SELECT Nome FROM Usuarios WHERE ID = ?", (id_usuario,))
                     nome_usuario = cursor.fetchone()[0]
 
-                    cursor.execute("INSERT INTO Historico_Peso (Usuario_ID, Nome_Usuario, Peso, Data_Peso) VALUES (?, ?, ?, ?)", (id_usuario, nome_usuario, novo_peso, data))
+                    usuario_obj = Usuario(cadastro_id, nome, idade, sexo, altura, peso, objetivo, nivel_atividade, metas)
+                    imc = usuario_obj.calcular_imc()
+
+                    cursor.execute("INSERT INTO Historico_Peso (Usuario_ID, Nome_Usuario, imc, Peso, Data_Peso) VALUES (?, ?, ?, ?, ?)", (id_usuario, nome_usuario, imc, novo_peso, data.strftime("%d/%m/%Y")))
                     conexao.commit()
                     st.rerun()
 
@@ -651,6 +716,13 @@ def sistema_exercicio(id_usuario, peso):
 def sistema_dieta(id_usuario):
     with conectar_banco() as conexao:
         cursor = conexao.cursor()
+
+        cursor.execute('''SELECT Cadastro_ID, Nome, Idade, Sexo, Altura, Peso, Objetivo, Nivel_Atividade, Metas
+                          FROM Usuarios WHERE ID = ?''', (id_usuario,))
+        usuario = cursor.fetchone()
+
+        cadastro_id, nome, idade, sexo, altura, peso, objetivo, nivel_atividade, metas = usuario
+
         st.header("🥗 Registro de Dieta")
         nome_dieta = st.text_input("Nome da dieta")
         tipo_dieta = st.selectbox("Tipo", ["Low Carb", "Cetogênica", "Vegana", "Vegetariana"])
@@ -681,8 +753,11 @@ def sistema_dieta(id_usuario):
                         
                         cursor.execute("SELECT Nome FROM Usuarios WHERE ID = ?", (id_usuario,))
                         nome_usuario = cursor.fetchone()[0]
+
+                        usuario_obj = Usuario(cadastro_id, nome, idade, sexo, altura, peso, objetivo, nivel_atividade, metas)
+                        imc = usuario_obj.calcular_imc()
                         
-                        cursor.execute("INSERT INTO Historico_Peso (Usuario_ID, Nome_Usuario, Peso, Data_Peso) VALUES (?, ?, ?, ?)", (id_usuario, nome_usuario, novo_peso, data))
+                        cursor.execute("INSERT INTO Historico_Peso (Usuario_ID, Nome_Usuario, imc, Peso, Data_Peso) VALUES (?, ?, ?, ?, ?)", (id_usuario, nome_usuario, imc, novo_peso, data.strftime("%d/%m/%Y")))
                         conexao.commit()
                         st.rerun()
 
@@ -707,6 +782,14 @@ def sistema(email):
         usuario_obj = Usuario(cadastro_id, nome, idade, sexo, altura, peso, objetivo, nivel_atividade, metas)
         st.subheader(f"Olá, {nome}!")
         st.metric("Seu IMC", usuario_obj.calcular_imc())
+
+        if usuario_obj.calcular_imc() < 18.5:
+            st.info("IMC abaixo do ideal, Você está com baixo peso!")
+        elif usuario_obj.calcular_imc() > 24.9:
+            st.info("IMC acima do ideal, Você está com sobrepeso/obesidade!")
+        else:
+            st.info("IMC ideal! Você está em boa forma!")
+
         st.markdown("---")
 
         st.text(f"Deseja mudar seu objetivo?\nObjetivo escolhido anteriormente: {objetivo}")
@@ -759,9 +842,12 @@ def sistema(email):
                     cursor.execute("SELECT last_insert_rowid()")
                     ultimo_id = cursor.fetchone()[0]
 
+                    usuario_obj = Usuario(cadastro_id, nome, idade, sexo, altura, peso, objetivo, nivel_atividade, metas)
+                    imc = usuario_obj.calcular_imc()
+
                     data_peso = datetime.now()
 
-                    cursor.execute("INSERT INTO Historico_Peso (Usuario_ID, Nome_Usuario, Peso, Data_Peso) VALUES (?, ?, ?, ?)", (ultimo_id, nome, peso, data_peso.strftime("%d/%m/%Y")))
+                    cursor.execute("INSERT INTO Historico_Peso (Usuario_ID, Nome_Usuario, imc, Peso, Data_Peso) VALUES (?, ?, ?, ?, ?)", (ultimo_id, nome, imc, peso, data_peso.strftime("%d/%m/%Y")))
                     conexao.commit()
                     st.rerun()
 
