@@ -190,9 +190,9 @@ class Dieta:
         self.usuario_id = usuario_id
         self.nome_dieta = nome_dieta
         self.tipo_dieta = tipo_dieta
-        self.calorias_diarias = calorias_diarias or self.calcular_calorias_diarias()
         self.macronutrientes = macronutrientes
         self.objetivo = objetivo
+        self.calorias_diarias = calorias_diarias or self.calcular_calorias_diarias()
 
     def calcular_calorias_diarias(self):
         try:
@@ -256,7 +256,7 @@ def analise_dados(id_usuario):
         with tab1:
             # Tabelas com informações do Usuário
 
-            modo_tabelas = st.radio("Escolha Tipo de Tabela:", ["Histórico de Exercícios", "Histórico de Dietas", "Histórico de Peso"], horizontal=True)
+            modo_tabelas = st.radio("Escolha Tipo de Tabela:", ["Histórico de Exercícios", "Histórico de Dietas", "Histórico de Peso e IMC"], horizontal=True)
 
             if modo_tabelas == "Histórico de Exercícios":
                 df_exercicios = pd.read_sql("SELECT * FROM Exercicios WHERE Usuario_ID = ?", conectar_banco(), params=(id_usuario,))
@@ -268,9 +268,9 @@ def analise_dados(id_usuario):
                 st.subheader("Histórico de Dietas")
                 st.dataframe(df_dietas if not df_dietas.empty else pd.DataFrame(["Sem dietas registradas."]))
 
-            elif modo_tabelas == "Histórico de Peso":
+            elif modo_tabelas == "Histórico de Peso e IMC":
                 df_historico = pd.read_sql("SELECT * FROM Historico_Peso WHERE Usuario_ID = ?", conectar_banco(), params=(id_usuario,))
-                st.subheader("Histórico de Peso")
+                st.subheader("Histórico de Peso e IMC")
                 st.dataframe(df_historico if not df_historico.empty else pd.DataFrame(["Nenhuma informação inserida ainda."]))
             
         with tab2:
@@ -528,14 +528,23 @@ def sistema(email):
         id_usuario, nome, idade, sexo, altura, peso, objetivo, nivel_atividade, metas = usuario
         usuario_obj = Usuario(cadastro_id, nome, idade, sexo, altura, peso, objetivo, nivel_atividade, metas)
         st.subheader(f"Olá, {nome}!")
-        st.metric("Seu IMC", usuario_obj.calcular_imc())
+        
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.metric("Seu IMC", usuario_obj.calcular_imc())
+
+        with col2:
+            metas_str = str(metas)
+            st.metric("Suas metas", metas_str)
+
 
         if usuario_obj.calcular_imc() < 18.5:
-            st.info("IMC abaixo do ideal, Você está com baixo peso!")
+            st.info("🔵 IMC abaixo do ideal, Você está com baixo peso!")
         elif usuario_obj.calcular_imc() > 24.9:
-            st.info("IMC acima do ideal, Você está com sobrepeso/obesidade!")
+            st.info("🔴 IMC acima do ideal, Você está com sobrepeso/obesidade!")
         else:
-            st.info("IMC ideal! Você está em boa forma!")
+            st.info("🟢 IMC ideal! Você está em boa forma!")
 
         st.markdown("---")
 
@@ -553,6 +562,8 @@ def sistema(email):
             st.success("✅ Objetivo atualizado com sucesso!")
             objetivo_atual = novo_objetivo
             st.text(f"Objetivo atual: {objetivo_atual}")
+
+        st.markdown("---")
 
         st.subheader("Registrar Atividade")
         modo = st.radio("Escolha:", ["Exercício", "Dieta"], horizontal=True)
@@ -606,9 +617,9 @@ def sistema(email):
 # Momento Streamlit - Andrei
 
 # Sistema Inicial/Login
-st.set_page_config("🏋️‍♀️ Metas Fitness", layout="wide")
-st.title("🏋️ FitLife")
-st.caption("Acompanhe sua rotina de exercícios e dieta.")
+st.set_page_config("Metas Fitness", layout="wide")
+st.title("🏃‍♂️💪 FitLife")
+st.caption("Acompanhe sua rotina de exercícios e dietas.")
 st.markdown("---")
 
 criar_tabelas()

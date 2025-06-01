@@ -1,3 +1,5 @@
+# Codigo de Teste para o Sistema
+
 # python -m streamlit run teste_sistema.py
 
 import re
@@ -116,6 +118,7 @@ class Usuario:
         except:
             return None
 
+
 class Exercicio:
     def __init__(self, usuario_id, nome_exercicio, tipo_exercicio, duracao, intensidade, objetivo):
         self.usuario_id = usuario_id
@@ -171,14 +174,15 @@ class Exercicio:
             print(f"Erro ao calcular novo peso: {erro}")
             return None
 
+
 class Dieta:
     def __init__(self, usuario_id, nome_dieta, tipo_dieta, calorias_diarias, macronutrientes, objetivo):
         self.usuario_id = usuario_id
         self.nome_dieta = nome_dieta
         self.tipo_dieta = tipo_dieta
-        self.calorias_diarias = calorias_diarias or self.calcular_calorias_diarias()
         self.macronutrientes = macronutrientes
         self.objetivo = objetivo
+        self.calorias_diarias = calorias_diarias or self.calcular_calorias_diarias()
 
     def calcular_calorias_diarias(self):
         try:
@@ -231,274 +235,7 @@ class Dieta:
         except Exception as erro:
             print(f"Erro ao calcular novo peso: {erro}")
             return None
-
-# def sistema(email):
-#     with conectar_banco() as conexao:
-#         cursor = conexao.cursor()
-#         cursor.execute("SELECT ID FROM Cadastros WHERE Email = ?", (email,))
-#         cadastro = cursor.fetchone()
-
-#         if not cadastro:
-#             st.error("Cadastro não encontrado.")
-#             return
-
-#         cadastro_id = cadastro[0]
-#         cursor.execute('''SELECT ID, Nome, Idade, Sexo, Altura, Peso, Objetivo, Nivel_Atividade, Metas
-#                           FROM Usuarios WHERE Cadastro_ID = ?''', (cadastro_id,))
-#         usuario = cursor.fetchone()
-
-#     if usuario:
-#         id_usuario, nome, idade, sexo, altura, peso, objetivo, nivel_atividade, metas = usuario
-#         usuario_obj = Usuario(cadastro_id, nome, idade, sexo, altura, peso, objetivo, nivel_atividade, metas)
-#         st.subheader(f"Olá, {nome}!")
-#         st.metric("Seu IMC", usuario_obj.calcular_imc())
-#         st.markdown("---")
-
-#         tab1, tab2 = st.tabs(["📜 Tabelas com Informações do Usuário", "📈 Gráficos dos Exercícios/Dietas"])
-
-#         with tab1:
-#             # Tabelas com informações do Usuário
-
-#             df_exercicios = pd.read_sql("SELECT * FROM Exercicios WHERE Usuario_ID = ?", conectar_banco(), params=(id_usuario,))
-#             st.subheader("Histórico de Exercícios")
-#             st.dataframe(df_exercicios if not df_exercicios.empty else pd.DataFrame(["Sem exercícios registrados."]))
-#             st.markdown("---")
-            
-#             df_dietas = pd.read_sql("SELECT * FROM Dietas WHERE Usuario_ID = ?", conectar_banco(), params=(id_usuario,))
-#             st.subheader("Histórico de Dietas")
-#             st.dataframe(df_dietas if not df_dietas.empty else pd.DataFrame(["Sem dietas registradas."]))
-#             st.markdown("---")
-            
-#             df_historico = pd.read_sql("SELECT * FROM Historico_Peso WHERE Usuario_ID = ?", conectar_banco(), params=(id_usuario,))
-#             st.subheader("Histórico de Peso")
-#             st.dataframe(df_historico if not df_historico.empty else pd.DataFrame(["Nenhuma informação inserida ainda."]))
-#             st.markdown("---")
-
-#         with tab2:
-#             # Gráfico de Linha - Evolução do Peso
-
-#             df_linha_tempo = pd.read_sql_query(
-#                 "SELECT Data_Peso, Peso FROM Historico_Peso WHERE Usuario_ID = ? ORDER BY Data_Peso",conexao,params=(id_usuario,))
-            
-#             if df_linha_tempo.empty:
-#                 st.info("📭 Nenhum dado de peso registrado no histórico ainda.")
-#                 return
-            
-#             df_linha_tempo["Data_Peso"] = pd.to_datetime(df_linha_tempo["Data_Peso"], dayfirst=True, errors="coerce")
-            
-#             df_linha_tempo = df_linha_tempo.sort_values(by="Data_Peso")
-            
-#             fig = px.line(
-#                 df_linha_tempo,
-#                 x="Data_Peso",
-#                 y="Peso",
-#                 title="Evolução do Peso",
-#                 markers=True
-#                 )
-            
-#             fig.update_layout(
-#                 xaxis_title="Data",
-#                 yaxis_title="Peso (kg)",
-#                 hovermode="x unified",
-#                 template="plotly_white"
-#                 )
-            
-#             st.plotly_chart(fig, use_container_width=True)
-
-#             # Gráficos de Pizza - Tipo de Exercicios mais escolhidos
-
-#             df_tipos_exercicios = pd.read_sql_query(
-#                 "SELECT Tipo_Exercicio FROM Exercicios WHERE Usuario_ID = ?", conexao, params=(id_usuario,))
-            
-#             if df_tipos_exercicios.empty:
-#                 st.info("📭 Nenhuma atividade de exercício registrado no histórico ainda.")
-#                 return
-            
-#             df_tipos_exercicios = pd.read_sql_query(
-#                 """
-#                 SELECT Tipo_Exercicio, COUNT(*) AS Quantidade
-#                 FROM Exercicios
-#                 WHERE Usuario_ID = ?
-#                 GROUP BY Tipo_Exercicio
-#                 """,
-#                 conexao,
-#                 params=(id_usuario,)
-#                 )
-            
-#             if df_tipos_exercicios.empty:
-#                 st.info("📭 Nenhuma atividade de exercício registrada no histórico ainda.")
-#             else:
-#                 fig = px.pie(
-#                     df_tipos_exercicios,
-#                     values='Quantidade',
-#                     names='Tipo_Exercicio',
-#                     title='Distribuição dos Tipos de Exercício Realizados'
-#                     )
-#                 fig.update_traces(textposition='inside', textinfo='percent+label')
-#                 st.plotly_chart(fig, use_container_width=True)
-
-#     else:
-#         st.subheader("👤 Cadastro de Informações Pessoais")
-#         nome = st.text_input("Nome")
-#         idade = st.number_input("Idade:", min_value=0, max_value=120, value=25)
-#         sexo = st.selectbox("Sexo", ["Masculino", "Feminino", "Outro"])
-#         altura = st.slider("Altura (m)", 1.0, 2.5, 1.70)
-#         peso = st.slider("Peso (kg)", 30.0, 200.0, 70.0)
-#         objetivo = st.selectbox("Objetivo", ["Ganhar massa muscular", "Perder gordura", "Manter forma"])
-#         nivel_atividade = st.selectbox("Atividade Física", ["Sedentário", "Moderado", "Ativo"])
-#         metas = st.text_input("Metas pessoais")
-
-#         if st.button("Salvar Informações"):
-#             if not nome or not metas:
-#                 st.warning("Preencha todos os campos obrigatórios!")
-#             else:
-#                 with conectar_banco() as conexao:
-#                     cursor = conexao.cursor()
-#                     cursor.execute('''
-#                         INSERT INTO Usuarios (Cadastro_ID, Nome, Idade, Sexo, Altura, Peso, Objetivo, Nivel_Atividade, Metas)
-#                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-#                         ''', (cadastro_id, nome, idade, sexo, altura, peso, objetivo, nivel_atividade, metas))
-#                     conexao.commit()
-#                     st.success("Informações salvas com sucesso!")
-
-#                     cursor.execute("SELECT last_insert_rowid()")
-#                     ultimo_id = cursor.fetchone()[0]
-
-#                     data_peso = datetime.now()
-
-#                     cursor.execute("INSERT INTO Historico_Peso (Usuario_ID, Nome_Usuario, Peso, Data_Peso) VALUES (?, ?, ?, ?)", (ultimo_id, nome, peso, data_peso.strftime("%d/%m/%Y")))
-#                     st.rerun()
-#                     return
-
-#     st.markdown("---")
-#     st.subheader("Registrar Atividade")
-#     modo = st.radio("Escolha:", ["Exercício", "Dieta"], horizontal=True)
-
-#     if modo == "Exercício":
-#         st.header("🏋️ Registro de Exercício")
-#         nome_ex = st.text_input("Nome do exercício")
-#         tipo_ex = st.selectbox("Tipo", ["Cardio", "Força", "Flexibilidade", "Outro"])
-#         duracao = st.number_input("Duração (minutos)", 1, 300)
-#         intensidade = st.selectbox("Intensidade", ["Leve", "Moderada", "Intensa"])
-#         data = st.date_input("Data do exercício")
-#         exercicio = Exercicio(nome_ex, tipo_ex, duracao, intensidade)
-#         calorias = exercicio.calcular_calorias_queimadas(peso)
-
-#         if st.button("Salvar Exercício"):
-#             if not nome_ex:
-#                 st.warning("Preencha todos os campos obrigatórios!")
-#             else:
-#                 with conectar_banco() as conexao:
-#                     cursor = conexao.cursor()
-#                     cursor.execute('''
-#                         INSERT INTO Exercicios (Usuario_ID, Nome_Exercicio, Tipo_Exercicio, Duracao, Intensidade, Calorias_Queimadas, Data_Exercicio)
-#                         VALUES (?, ?, ?, ?, ?, ?, ?)
-#                         ''', (id_usuario, nome_ex, tipo_ex, duracao, intensidade, calorias, data.strftime("%d/%m/%Y")))
-#                     novo_peso = exercicio.novo_peso_exercicio()
-                    
-#                     if novo_peso:
-#                         cursor.execute("UPDATE Usuarios SET Peso = ? WHERE ID = ?", (novo_peso, id_usuario))
-
-#                         cursor.execute("SELECT Nome FROM Usuarios WHERE ID = ?", (id_usuario,))
-#                         nome_usuario = cursor.fetchone()[0]
-
-#                         cursor.execute("INSERT INTO Historico_Peso (Usuario_ID, Nome_Usuario, Peso, Data_Peso) VALUES (?, ?, ?, ?)", (id_usuario, nome_usuario, novo_peso, data))
-#                         conexao.commit()
-#                         st.success("✅ Exercício registrado!")
-
-#     elif modo == "Dieta":
-#         st.header("🥗 Registro de Dieta")
-#         nome_dieta = st.text_input("Nome da dieta")
-#         tipo_dieta = st.selectbox("Tipo", ["Low Carb", "Cetogênica", "Vegana", "Outro"])
-#         macronutrientes = st.selectbox("Macronutrientes", ["Proteínas", "Carboidratos", "Gorduras", "Balanceado"])
-#         data = st.date_input("Data da dieta")
-#         dieta = Dieta(nome_dieta, tipo_dieta, 0, macronutrientes, objetivo)
-#         calorias = dieta.calcular_calorias_diarias()
-
-#         if calorias:
-#             st.info(f"Calorias diárias estimadas: {calorias}")
-
-#         if st.button("Salvar Dieta"):
-#             if not nome_dieta:
-#                 st.warning("Preencha todos os campo!")
-#             else:
-#                 with conectar_banco() as conexao:
-#                     cursor = conexao.cursor()
-#                     cursor.execute('''
-#                         INSERT INTO Dietas (Usuario_ID, Nome_Dieta, Tipo_Dieta, Calorias_Diarias, Macronutrientes, Data_Dieta)
-#                         VALUES (?, ?, ?, ?, ?, ?)
-#                         ''', (id_usuario, nome_dieta, tipo_dieta, calorias, macronutrientes, data.strftime("%d/%m/%Y")))
-                    
-#                     novo_peso = dieta.novo_peso_dieta()
         
-#                     if novo_peso:
-#                         cursor.execute("UPDATE Usuarios SET Peso = ? WHERE ID = ?", (novo_peso, id_usuario))
-
-#                         cursor.execute("SELECT Nome FROM Usuarios WHERE ID = ?", (id_usuario,))
-#                         nome_usuario = cursor.fetchone()[0]
-
-#                         cursor.execute("INSERT INTO Historico_Peso (Usuario_ID, Nome_Usuario, Peso, Data_Peso) VALUES (?, ?, ?, ?)", (id_usuario, nome_usuario, novo_peso, data))
-#                         conexao.commit()
-#                         st.success("✅ Dieta registrada!")
-
-#     st.markdown("---")
-#     st.caption("Desenvolvido por Andrei, Fernanda e Jucilene. 🚀")
-
-# # Interface principal
-# st.set_page_config("🏋️‍♀️ Metas Fitness", layout="wide")
-# st.title("🏋️ FitLife")
-# st.caption("Acompanhe sua rotina de exercícios e dieta.")
-# st.markdown("---")
-
-# criar_tabelas()
-
-# if "logado" not in st.session_state:
-#     st.session_state.logado = False
-# if "email_usuario" not in st.session_state:
-#     st.session_state.email_usuario = ""
-
-# if not st.session_state.logado:
-#     col1, col2 = st.columns(2)
-
-#     with col1:
-#         st.subheader("🔐 Login ou Cadastro")
-#         modo = st.radio("Modo", ["Login", "Cadastro"])
-#         email = st.text_input("E-mail")
-#         senha = st.text_input("Senha", type="password")
-        
-#         if st.button("Entrar" if modo == "Login" else "Cadastrar"):
-#             if not email or not senha:
-#                 st.warning("Preencha todos os campos.")
-#             elif not validar_email(email):
-#                 st.warning("E-mail inválido.")
-#             else:
-#                 with conectar_banco() as conexao:
-#                     cursor = conexao.cursor()
-#                     senha_hash = hash_senha(senha)
-                    
-#                     if modo == "Login":
-#                         cursor.execute("SELECT ID FROM Cadastros WHERE Email = ? AND Senha = ?", (email, senha_hash))
-#                         usuario = cursor.fetchone()
-#                         if usuario:
-#                             st.session_state.logado = True
-#                             st.session_state.email_usuario = email
-#                             st.success("✅ Login realizado!")
-#                             st.rerun()
-#                         else:
-#                             st.error("E-mail ou senha incorretos.")
-#                     else:
-#                         cursor.execute("SELECT * FROM Cadastros WHERE Email = ?", (email,))
-#                         if cursor.fetchone():
-#                             st.warning("E-mail já cadastrado.")
-#                         else:
-#                             cursor.execute("INSERT INTO Cadastros (Email, Senha) VALUES (?, ?)", (email, senha_hash))
-#                             conexao.commit()
-#                             st.success("✅ Cadastro realizado!")
-#                             st.session_state.logado = True
-#                             st.session_state.email_usuario = email
-#                             st.rerun()
-# else:
-#     sistema(st.session_state.email_usuario)
 
 # Momento Dashboard ou Métricas - Jucilene
 
@@ -509,7 +246,7 @@ def analise_dados(id_usuario):
         with tab1:
             # Tabelas com informações do Usuário
 
-            modo_tabelas = st.radio("Escolha Tipo de Tabela:", ["Histórico de Exercícios", "Histórico de Dietas", "Histórico de Peso"], horizontal=True)
+            modo_tabelas = st.radio("Escolha Tipo de Tabela:", ["Histórico de Exercícios", "Histórico de Dietas", "Histórico de Peso e IMC"], horizontal=True)
 
             if modo_tabelas == "Histórico de Exercícios":
                 df_exercicios = pd.read_sql("SELECT * FROM Exercicios WHERE Usuario_ID = ?", conectar_banco(), params=(id_usuario,))
@@ -521,9 +258,9 @@ def analise_dados(id_usuario):
                 st.subheader("Histórico de Dietas")
                 st.dataframe(df_dietas if not df_dietas.empty else pd.DataFrame(["Sem dietas registradas."]))
 
-            elif modo_tabelas == "Histórico de Peso":
+            elif modo_tabelas == "Histórico de Peso e IMC":
                 df_historico = pd.read_sql("SELECT * FROM Historico_Peso WHERE Usuario_ID = ?", conectar_banco(), params=(id_usuario,))
-                st.subheader("Histórico de Peso")
+                st.subheader("Histórico de Peso e IMC")
                 st.dataframe(df_historico if not df_historico.empty else pd.DataFrame(["Nenhuma informação inserida ainda."]))
             
         with tab2:
@@ -665,7 +402,7 @@ def analise_dados(id_usuario):
                     fig.update_layout(yaxis={'categoryorder': 'total ascending'})
                     st.plotly_chart(fig, use_container_width=True)
 
-
+# Sistema Exercício
 def sistema_exercicio(id_usuario, peso):
     with conectar_banco() as conexao:
         cursor = conexao.cursor()
@@ -712,7 +449,7 @@ def sistema_exercicio(id_usuario, peso):
                     conexao.commit()
                     st.rerun()
 
-
+# Sistema Dieta
 def sistema_dieta(id_usuario):
     with conectar_banco() as conexao:
         cursor = conexao.cursor()
@@ -761,7 +498,7 @@ def sistema_dieta(id_usuario):
                         conexao.commit()
                         st.rerun()
 
-
+# Sistema Principal/Usuário
 def sistema(email):
     with conectar_banco() as conexao:
         cursor = conexao.cursor()
@@ -781,14 +518,23 @@ def sistema(email):
         id_usuario, nome, idade, sexo, altura, peso, objetivo, nivel_atividade, metas = usuario
         usuario_obj = Usuario(cadastro_id, nome, idade, sexo, altura, peso, objetivo, nivel_atividade, metas)
         st.subheader(f"Olá, {nome}!")
-        st.metric("Seu IMC", usuario_obj.calcular_imc())
+        
+        col1, col2 = st.columns(2)
+
+        with col1:
+            st.metric("Seu IMC", usuario_obj.calcular_imc())
+
+        with col2:
+            metas_str = str(metas)
+            st.metric("Suas metas", metas_str)
+
 
         if usuario_obj.calcular_imc() < 18.5:
-            st.info("IMC abaixo do ideal, Você está com baixo peso!")
+            st.info("🔵 IMC abaixo do ideal, Você está com baixo peso!")
         elif usuario_obj.calcular_imc() > 24.9:
-            st.info("IMC acima do ideal, Você está com sobrepeso/obesidade!")
+            st.info("🔴 IMC acima do ideal, Você está com sobrepeso/obesidade!")
         else:
-            st.info("IMC ideal! Você está em boa forma!")
+            st.info("🟢 IMC ideal! Você está em boa forma!")
 
         st.markdown("---")
 
@@ -806,6 +552,8 @@ def sistema(email):
             st.success("✅ Objetivo atualizado com sucesso!")
             objetivo_atual = novo_objetivo
             st.text(f"Objetivo atual: {objetivo_atual}")
+
+        st.markdown("---")
 
         st.subheader("Registrar Atividade")
         modo = st.radio("Escolha:", ["Exercício", "Dieta"], horizontal=True)
@@ -857,10 +605,11 @@ def sistema(email):
 
 
 # Momento Streamlit - Andrei
-      
-st.set_page_config("🏋️‍♀️ Metas Fitness", layout="wide")
-st.title("🏋️ FitLife")
-st.caption("Acompanhe sua rotina de exercícios e dieta.")
+
+# Sistema Inicial/Login
+st.set_page_config("Metas Fitness", layout="wide")
+st.title("🏃‍♂️💪 FitLife")
+st.caption("Acompanhe sua rotina de exercícios e dietas.")
 st.markdown("---")
 
 criar_tabelas()
