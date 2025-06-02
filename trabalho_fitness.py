@@ -274,9 +274,9 @@ def analise_dados(id_usuario):
                 st.dataframe(df_historico if not df_historico.empty else pd.DataFrame(["Nenhuma informação inserida ainda."]))
             
         with tab2:
-            modo_graficos = st.radio("Escolha Tipo de Gráfico:", ["Evolução do Peso", "Tipos de Exercícios mais escolhidos", "Tipos de Dietas mais escolhidos", "Macronutrientes mais consumidos"], horizontal=True)
+            modo_graficos = st.radio("Escolha Tipo de Gráfico:", ["Evolução do Peso e IMC", "Tipos de Exercícios mais escolhidos", "Tipos de Dietas mais escolhidos", "Macronutrientes mais consumidos"], horizontal=True)
 
-            if modo_graficos == "Evolução do Peso":
+            if modo_graficos == "Evolução do Peso e IMC":
                 # Gráfico de Linha - Evolução do Peso
                 df_peso = pd.read_sql_query(
                     "SELECT Data_Peso, Peso FROM Historico_Peso WHERE Usuario_ID = ? ORDER BY Data_Peso",conexao,params=(id_usuario,))
@@ -537,7 +537,6 @@ def sistema(email):
         with col2:
             metas_str = str(metas)
             st.metric("Suas metas", metas_str)
-
 
         if usuario_obj.calcular_imc() < 18.5:
             st.info("🔵 IMC abaixo do ideal, Você está com baixo peso!")
