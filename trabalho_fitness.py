@@ -145,7 +145,7 @@ class Exercicio:
         tempo_em_horas = self.duracao / 60
         self.calorias_queimadas = round(met_intensidade * peso * tempo_em_horas, 2)
         return self.calorias_queimadas
-
+        
     def novo_peso_exercicio(self):
         try:
             with conectar_banco() as conexao:
@@ -153,33 +153,21 @@ class Exercicio:
                 cursor.execute("SELECT Peso FROM Usuarios WHERE ID = ?", (self.usuario_id,))
                 peso_atual = cursor.fetchone()
                 if peso_atual:
-                    # Força
                     if self.objetivo == "Ganhar massa muscular":
                         if self.tipo_exercicio == "Força":
-                            novo_peso = peso_atual[0] + (self.calorias_queimadas / 8800)
-                            return round(novo_peso, 2)
-                        else:
-                            novo_peso = peso_atual[0] + (self.calorias_queimadas / 7700)
-                            return round(novo_peso, 2)
+                            return round(peso_atual[0] + (self.calorias_queimadas / 8800), 2)
+                        return round(peso_atual[0] + (self.calorias_queimadas / 7700), 2)
                     
-                    # Cardio
                     elif self.objetivo == "Perder gordura":
                         if self.tipo_exercicio == "Cardio":
-                            novo_peso = peso_atual[0] - (self.calorias_queimadas / 8800)
-                            return round(novo_peso, 2)
-                        else:
-                            novo_peso = peso_atual[0] - (self.calorias_queimadas / 7700)
-                            return round(novo_peso, 2)
+                            return round(peso_atual[0] - (self.calorias_queimadas / 8800), 2)
+                        return round(peso_atual[0] - (self.calorias_queimadas / 7700), 2)
                         
-                    # Flexibilidade e Outro
                     elif self.objetivo == "Manter forma":
                         if self.tipo_exercicio == "Flexibilidade" or "Outro":
-                            novo_peso = peso_atual[0] + (self.calorias_queimadas / 7700) - (self.calorias_queimadas / 5500)
-                            return round(novo_peso, 2)
-                        else:
-                            novo_peso = peso_atual[0] + (self.calorias_queimadas / 8800) - (self.calorias_queimadas / 5500)
-                            return round(novo_peso, 2)
-
+                            return round(peso_atual[0] + (self.calorias_queimadas / 8800) - (self.calorias_queimadas / 5500), 2)
+                        return round(peso_atual[0] + (self.calorias_queimadas / 7700) - (self.calorias_queimadas / 5500), 2)
+                    
         except Exception as erro:
             print(f"Erro ao calcular novo peso: {erro}")
             return None
@@ -193,40 +181,40 @@ class Dieta:
         self.macronutrientes = macronutrientes
         self.objetivo = objetivo
         self.calorias_diarias = calorias_diarias or self.calcular_calorias_diarias()
-
+        
     def calcular_calorias_diarias(self):
         try:
-            #Low Carb
-            if self.objetivo == "Ganhar massa muscular" and self.tipo_dieta == "Low Carb":
-                return {"Proteínas": 1800, "Carboidratos": 1600, "Gorduras": 2000}.get(self.macronutrientes, 1600)
-            elif self.objetivo == "Perder gordura" and self.tipo_dieta == "Low Carb":
-                return {"Proteínas": 1400, "Carboidratos": 1300, "Gorduras": 1500}.get(self.macronutrientes, 1300) 
-                
-            # Cetogênica
-            elif self.objetivo == "Ganhar massa muscular" and self.tipo_dieta == "Cetogênica":
-                return {"Proteínas": 2000, "Carboidratos": 1800, "Gorduras": 2200}.get(self.macronutrientes, 2200)
-            elif self.objetivo == "Perder gordura" and self.tipo_dieta == "Cetogênica":
-                return {"Proteínas": 1500, "Carboidratos": 1400, "Gorduras": 1600}.get(self.macronutrientes, 1400)   
-              
-            # Vegana
-            elif self.objetivo == "Ganhar massa muscular" and self.tipo_dieta == "Vegana":
-                return {"Proteínas": 2000, "Carboidratos": 1800, "Gorduras": 2200}.get(self.macronutrientes, 1800)
-            elif self.objetivo == "Perder gordura" and self.tipo_dieta == "Vegana":
-                return {"Proteínas": 1500, "Carboidratos": 1300, "Gorduras": 1800}.get(self.macronutrientes, 1300)  
-               
-            # Vegetariana
-            elif self.objetivo == "Ganhar massa muscular" and self.tipo_dieta == "Vegetariana":
-                return {"Proteínas": 1900, "Carboidratos": 1800, "Gorduras": 2100}.get(self.macronutrientes, 1800)
-            elif self.objetivo == "Perder gordura" and self.tipo_dieta == "Vegetariana":
-                return {"Proteínas": 1600, "Carboidratos": 1500, "Gorduras": 1800}.get(self.macronutrientes, 1500)     
+            tabela_calorias = {
+                "Low Carb": {
+                    "Ganhar massa muscular": {"Proteínas": 1800, "Carboidratos": 1600, "Gorduras": 2000},
+                    "Perder gordura": {"Proteínas": 1400, "Carboidratos": 1300, "Gorduras": 1500},
+                },
+                "Cetogênica": {
+                    "Ganhar massa muscular": {"Proteínas": 2000, "Carboidratos": 1800, "Gorduras": 2200},
+                    "Perder gordura": {"Proteínas": 1500, "Carboidratos": 1400, "Gorduras": 1600},
+                },
+                "Vegana": {
+                    "Ganhar massa muscular": {"Proteínas": 2000, "Carboidratos": 1800, "Gorduras": 2200},
+                    "Perder gordura": {"Proteínas": 1500, "Carboidratos": 1300, "Gorduras": 1800},
+                },
+                "Vegetariana": {
+                    "Ganhar massa muscular": {"Proteínas": 1900, "Carboidratos": 1800, "Gorduras": 2100},
+                    "Perder gordura": {"Proteínas": 1600, "Carboidratos": 1500, "Gorduras": 1800},
+                },
+                "Manter forma": {
+                    "Proteínas": 1350, "Carboidratos": 1800, "Gorduras": 1500,
+                },
+            }
             
-            # Manter forma
-            elif self.objetivo == "Manter forma":
-                return {"Proteínas": 1350, "Carboidratos": 1800, "Gorduras": 1500}.get(self.macronutrientes, 1800)
-                
+            if self.objetivo == "Manter forma":
+                return tabela_calorias["Manter forma"].get(self.macronutrientes, 1800)
+            
+            return tabela_calorias.get(self.tipo_dieta, {}).get(self.objetivo, {}).get(self.macronutrientes, 1600)
+        
         except Exception as erro:
-            print(f"Erro ao calcular calorias diárias: {erro}")
+            st.warning(f"Erro ao calcular calorias diárias")
             return None
+
 
     def novo_peso_dieta(self, calorias):
         try:
@@ -274,7 +262,7 @@ def analise_dados(id_usuario):
                 st.dataframe(df_historico if not df_historico.empty else pd.DataFrame(["Nenhuma informação inserida ainda."]))
             
         with tab2:
-            modo_graficos = st.radio("Escolha Tipo de Gráfico:", ["Evolução do Peso e IMC", "Tipos de Exercícios mais escolhidos", "Tipos de Dietas mais escolhidos", "Macronutrientes mais consumidos"], horizontal=True)
+            modo_graficos = st.radio("Escolha Tipo de Gráfico:", ["Evolução do Peso e IMC", "Tipos de Exercícios e Dietas mais escolhidos", "Macronutrientes mais consumidos"], horizontal=True)
 
             if modo_graficos == "Evolução do Peso e IMC":
                 # Gráfico de Linha - Evolução do Peso
@@ -332,7 +320,7 @@ def analise_dados(id_usuario):
                     )
                 st.plotly_chart(fig, use_container_width=True)
 
-            elif modo_graficos == "Tipos de Exercícios mais escolhidos":
+            elif modo_graficos == "Tipos de Exercícios e Dietas mais escolhidos":
                 # Gráficos de Pizza - Tipo de Exercicios mais escolhidos
                 
                 df_tipos_exercicios = pd.read_sql_query(
@@ -357,8 +345,8 @@ def analise_dados(id_usuario):
                         )
                     fig.update_traces(textposition='inside', textinfo='percent+label')
                     st.plotly_chart(fig, use_container_width=True)
+                    st.divider()
 
-            elif modo_graficos == "Tipos de Dietas mais escolhidos":
                 # Gráficos de Treemap - Tipo de Dietas mais escolhidos
                 
                 df_tipos_dietas = pd.read_sql_query(
@@ -565,11 +553,14 @@ def sistema(email):
         st.markdown("---")
 
         st.subheader("Registrar Atividade")
+        
         modo = st.radio("Escolha:", ["Exercício", "Dieta"], horizontal=True)
         if modo == "Exercício":
             sistema_exercicio(id_usuario, peso)
+            st.divider()
         elif modo == "Dieta":
             sistema_dieta(id_usuario)
+            st.divider()
 
         analise_dados(id_usuario)
 
