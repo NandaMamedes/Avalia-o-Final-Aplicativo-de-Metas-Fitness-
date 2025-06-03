@@ -90,16 +90,9 @@ def validar_email(email):
 
 
 class Usuario:
-    def __init__(self, cadastro_id, nome, idade, sexo, altura, peso, objetivo, nivel_atividade, metas):
-        self.cadastro_id = cadastro_id
-        self.nome = nome
-        self.idade = idade
-        self.sexo = sexo
+    def __init__(self, altura, peso):
         self.altura = altura
         self.peso = peso
-        self.objetivo = objetivo
-        self.nivel_atividade = nivel_atividade
-        self.metas = metas
 
     def calcular_imc(self):
         try:
@@ -111,9 +104,8 @@ class Usuario:
 
 
 class Exercicio:
-    def __init__(self, usuario_id, nome_exercicio, tipo_exercicio, duracao, intensidade, objetivo):
+    def __init__(self, usuario_id, tipo_exercicio, duracao, intensidade, objetivo):
         self.usuario_id = usuario_id
-        self.nome_exercicio = nome_exercicio
         self.tipo_exercicio = tipo_exercicio
         self.duracao = duracao
         self.intensidade = intensidade
@@ -155,9 +147,8 @@ class Exercicio:
 
 
 class Dieta:
-    def __init__(self, usuario_id, nome_dieta, tipo_dieta, calorias_diarias, macronutrientes, objetivo):
+    def __init__(self, usuario_id, tipo_dieta, calorias_diarias, macronutrientes, objetivo):
         self.usuario_id = usuario_id
-        self.nome_dieta = nome_dieta
         self.tipo_dieta = tipo_dieta
         self.macronutrientes = macronutrientes
         self.objetivo = objetivo
@@ -380,7 +371,7 @@ def sistema_exercicio(id_usuario, peso):
                           FROM Usuarios WHERE ID = ?''', (id_usuario,))
         usuario = cursor.fetchone()
 
-        cadastro_id, nome, idade, sexo, altura, peso, objetivo, nivel_atividade, metas = usuario
+        id_usuario, _, _, _, altura, peso, _, _, _ = usuario
 
         st.header("🏋️ Registro de Exercício")
         nome_ex = st.text_input("Nome do exercício")
@@ -390,7 +381,7 @@ def sistema_exercicio(id_usuario, peso):
         cursor.execute("SELECT Objetivo FROM Usuarios WHERE ID = ?", (id_usuario,))
         objetivo_usuario = cursor.fetchone()[0]
         data = st.date_input("Data do exercício")
-        exercicio = Exercicio(id_usuario, nome_ex, tipo_ex, duracao, intensidade, objetivo_usuario)
+        exercicio = Exercicio(id_usuario, tipo_ex, duracao, intensidade, objetivo_usuario)
         calorias = exercicio.calcular_calorias_queimadas(peso)
         
         if st.button("Salvar Exercício"):
@@ -411,7 +402,7 @@ def sistema_exercicio(id_usuario, peso):
                     cursor.execute("SELECT Nome FROM Usuarios WHERE ID = ?", (id_usuario,))
                     nome_usuario = cursor.fetchone()[0]
 
-                    usuario_obj = Usuario(cadastro_id, nome, idade, sexo, altura, peso, objetivo, nivel_atividade, metas)
+                    usuario_obj = Usuario(altura, peso)
                     imc = usuario_obj.calcular_imc()
 
                     cursor.execute("INSERT INTO Historico_Peso (Usuario_ID, Nome_Usuario, imc, Peso, Data_Peso) VALUES (?, ?, ?, ?, ?)", (id_usuario, nome_usuario, imc, novo_peso, data.strftime("%d/%m/%Y")))
@@ -427,7 +418,7 @@ def sistema_dieta(id_usuario):
                           FROM Usuarios WHERE ID = ?''', (id_usuario,))
         usuario = cursor.fetchone()
 
-        cadastro_id, nome, idade, sexo, altura, peso, objetivo, nivel_atividade, metas = usuario
+        id_usuario, _, _, _, altura, peso, _, _, _ = usuario
 
         st.header("🥗 Registro de Dieta")
         nome_dieta = st.text_input("Nome da dieta")
@@ -436,7 +427,7 @@ def sistema_dieta(id_usuario):
         data = st.date_input("Data da dieta")
         cursor.execute("SELECT Objetivo FROM Usuarios WHERE ID = ?", (id_usuario,))
         objetivo_usuario = cursor.fetchone()[0]
-        dieta = Dieta(id_usuario, nome_dieta, tipo_dieta, None, macronutrientes, objetivo_usuario)
+        dieta = Dieta(id_usuario, tipo_dieta, None, macronutrientes, objetivo_usuario)
         calorias = dieta.calcular_calorias_diarias()
         
         if calorias:
@@ -460,7 +451,7 @@ def sistema_dieta(id_usuario):
                         cursor.execute("SELECT Nome FROM Usuarios WHERE ID = ?", (id_usuario,))
                         nome_usuario = cursor.fetchone()[0]
 
-                        usuario_obj = Usuario(cadastro_id, nome, idade, sexo, altura, peso, objetivo, nivel_atividade, metas)
+                        usuario_obj = Usuario(altura, peso)
                         imc = usuario_obj.calcular_imc()
                         
                         cursor.execute("INSERT INTO Historico_Peso (Usuario_ID, Nome_Usuario, imc, Peso, Data_Peso) VALUES (?, ?, ?, ?, ?)", (id_usuario, nome_usuario, imc, novo_peso, data.strftime("%d/%m/%Y")))
@@ -484,8 +475,8 @@ def sistema(email):
         usuario = cursor.fetchone()
 
     if usuario:
-        id_usuario, nome, idade, sexo, altura, peso, objetivo, nivel_atividade, metas = usuario
-        usuario_obj = Usuario(cadastro_id, nome, idade, sexo, altura, peso, objetivo, nivel_atividade, metas)
+        id_usuario, nome, _, _, altura, peso, objetivo, _, metas = usuario
+        usuario_obj = Usuario( altura, peso)
         st.subheader(f"Olá, {nome}!")
         
         col1, col2 = st.columns(2)
@@ -561,7 +552,7 @@ def sistema(email):
                     cursor.execute("SELECT last_insert_rowid()")
                     ultimo_id = cursor.fetchone()[0]
 
-                    usuario_obj = Usuario(cadastro_id, nome, idade, sexo, altura, peso, objetivo, nivel_atividade, metas)
+                    usuario_obj = Usuario(altura, peso)
                     imc = usuario_obj.calcular_imc()
 
                     data_peso = datetime.now()
