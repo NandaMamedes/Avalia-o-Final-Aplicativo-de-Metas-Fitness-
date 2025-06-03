@@ -128,18 +128,18 @@ class Exercicio:
                 if peso_atual:
                     if self.objetivo == "Ganhar massa muscular":
                         if self.tipo_exercicio == "Força":
-                            return round(peso_atual[0] + (self.calorias_queimadas / 8800), 2)
-                        return round(peso_atual[0] + (self.calorias_queimadas / 7700), 2)
+                            return round(peso_atual[0] + (self.calorias_queimadas / 2200), 2)
+                        return round(peso_atual[0] + (self.calorias_queimadas / 5500), 2)
                     
                     elif self.objetivo == "Perder gordura":
                         if self.tipo_exercicio == "Cardio":
-                            return round(peso_atual[0] - (self.calorias_queimadas / 8800), 2)
-                        return round(peso_atual[0] - (self.calorias_queimadas / 7700), 2)
+                            return round(peso_atual[0] - (self.calorias_queimadas / 2200), 2)
+                        return round(peso_atual[0] - (self.calorias_queimadas / 5500), 2)
                         
                     elif self.objetivo == "Manter forma":
                         if self.tipo_exercicio == "Flexibilidade" or "Outro":
-                            return round(peso_atual[0] + (self.calorias_queimadas / 8800) - (self.calorias_queimadas / 5500), 2)
-                        return round(peso_atual[0] + (self.calorias_queimadas / 7700) - (self.calorias_queimadas / 5500), 2)
+                            return round(peso_atual[0] + (self.calorias_queimadas / 2200) - (self.calorias_queimadas / 4400), 2)
+                        return round(peso_atual[0] + (self.calorias_queimadas / 3300) - (self.calorias_queimadas / 44000), 2)
                     
         except Exception as erro:
             st.warning("Erro ao calcular novo peso")
@@ -200,7 +200,7 @@ class Dieta:
                     elif self.objetivo == "Perder gordura":
                         novo_peso = peso_atual[0] - (calorias / 7700)
                     elif self.objetivo == "Manter forma":
-                        novo_peso = peso_atual[0] + (calorias / 7700) - (calorias / 5500)
+                        novo_peso = peso_atual[0] + (calorias / 7700) - (calorias / 9900)
                     return round(novo_peso, 2)
         except Exception as erro:
             st.warning("Erro ao calcular novo peso")
