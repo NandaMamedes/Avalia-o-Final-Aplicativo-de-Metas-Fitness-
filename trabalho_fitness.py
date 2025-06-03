@@ -1,14 +1,6 @@
-# Avaliação Final - POO
+# Aplicativo de Metas Fitness
 
-# Tema:
-
-# 4. Aplicativo de Metas Fitness
-
-# Objetivo: Crie uma aplicação que monitore exercícios e dietas.
-
-# ● Classes: Usuario, Exercicio, Dieta.
-# ● Features: calcular calorias, progresso semanal, etc
-# ● Extra: Dashboard com gráficos
+# Desenvolvido por Andrei, Fernanda e Jucilene
 
 # python -m streamlit run trabalho_fitness.py
 
@@ -16,18 +8,12 @@ import re
 import hashlib
 import sqlite3
 import pandas as pd
-import plotly.express as px
 import streamlit as st
+import plotly.express as px
 from datetime import datetime
-
-# Momento Banco de Dados SQLite - Fernanda
-
-# Criação do Banco de Dados
 
 def conectar_banco():
     return sqlite3.connect("fitness.db")
-
-# Tabelas do Banco de Dados
 
 def criar_tabelas():
     with conectar_banco() as conexao:
@@ -96,17 +82,12 @@ def criar_tabelas():
         )
     ''')
 
-# Camuflar senha do usuario no banco de dados
-
 def hash_senha(senha):
     return hashlib.sha256(senha.encode()).hexdigest()
-
-# Validar email no sistema de login
 
 def validar_email(email):
     return re.match(r"[^@]+@[^@]+\.[^@]+", email)
 
-# Classes
 
 class Usuario:
     def __init__(self, cadastro_id, nome, idade, sexo, altura, peso, objetivo, nivel_atividade, metas):
@@ -169,7 +150,7 @@ class Exercicio:
                         return round(peso_atual[0] + (self.calorias_queimadas / 7700) - (self.calorias_queimadas / 5500), 2)
                     
         except Exception as erro:
-            print(f"Erro ao calcular novo peso: {erro}")
+            st.warning("Erro ao calcular novo peso")
             return None
 
 
@@ -212,7 +193,7 @@ class Dieta:
             return tabela_calorias.get(self.tipo_dieta, {}).get(self.objetivo, {}).get(self.macronutrientes, 1600)
         
         except Exception as erro:
-            st.warning(f"Erro ao calcular calorias diárias")
+            st.warning("Erro ao calcular calorias diárias")
             return None
 
 
@@ -231,19 +212,15 @@ class Dieta:
                         novo_peso = peso_atual[0] + (calorias / 7700) - (calorias / 5500)
                     return round(novo_peso, 2)
         except Exception as erro:
-            print(f"Erro ao calcular novo peso: {erro}")
+            st.warning("Erro ao calcular novo peso")
             return None
         
-
-# Momento Dashboard ou Métricas - Jucilene
 
 def analise_dados(id_usuario):
     with conectar_banco() as conexao:
         tab1, tab2 = st.tabs(["📜 Tabelas com Informações do Usuário", "📈 Gráficos dos Exercícios/Dietas"])
         
         with tab1:
-            # Tabelas com informações do Usuário
-
             modo_tabelas = st.radio("Escolha Tipo de Tabela:", ["Histórico de Exercícios", "Histórico de Dietas", "Histórico de Peso e IMC"], horizontal=True)
 
             if modo_tabelas == "Histórico de Exercícios":
@@ -265,7 +242,6 @@ def analise_dados(id_usuario):
             modo_graficos = st.radio("Escolha Tipo de Gráfico:", ["Evolução do Peso e IMC", "Tipos de Exercícios e Dietas mais escolhidos", "Macronutrientes mais consumidos"], horizontal=True)
 
             if modo_graficos == "Evolução do Peso e IMC":
-                # Gráfico de Linha - Evolução do Peso
                 df_peso = pd.read_sql_query(
                     "SELECT Data_Peso, Peso FROM Historico_Peso WHERE Usuario_ID = ? ORDER BY Data_Peso",conexao,params=(id_usuario,))
                     
@@ -293,7 +269,6 @@ def analise_dados(id_usuario):
                 st.plotly_chart(fig, use_container_width=True)
                 st.markdown("---")
                     
-                # Gráfico de Linha - Evolução do IMC
                 df_imc = pd.read_sql_query(
                     "SELECT Data_Peso, imc FROM Historico_Peso WHERE Usuario_ID = ? ORDER BY Data_Peso",conexao,params=(id_usuario,))
                     
@@ -321,7 +296,6 @@ def analise_dados(id_usuario):
                 st.plotly_chart(fig, use_container_width=True)
 
             elif modo_graficos == "Tipos de Exercícios e Dietas mais escolhidos":
-                # Gráficos de Pizza - Tipo de Exercicios mais escolhidos
                 
                 df_tipos_exercicios = pd.read_sql_query(
                     """
@@ -346,8 +320,6 @@ def analise_dados(id_usuario):
                     fig.update_traces(textposition='inside', textinfo='percent+label')
                     st.plotly_chart(fig, use_container_width=True)
                     st.divider()
-
-                # Gráficos de Treemap - Tipo de Dietas mais escolhidos
                 
                 df_tipos_dietas = pd.read_sql_query(
                     """
@@ -372,7 +344,6 @@ def analise_dados(id_usuario):
                     st.plotly_chart(fig, use_container_width=True)
 
             elif modo_graficos == "Macronutrientes mais consumidos":
-                # Gráfico de Barras - Macronutrientes mais consumidos
                 
                 df_macronutrientes = pd.read_sql_query(
                     """
@@ -400,7 +371,7 @@ def analise_dados(id_usuario):
                     fig.update_layout(yaxis={'categoryorder': 'total ascending'})
                     st.plotly_chart(fig, use_container_width=True)
 
-# Sistema Exercício
+
 def sistema_exercicio(id_usuario, peso):
     with conectar_banco() as conexao:
         cursor = conexao.cursor()
@@ -447,7 +418,7 @@ def sistema_exercicio(id_usuario, peso):
                     conexao.commit()
                     st.rerun()
 
-# Sistema Dieta
+
 def sistema_dieta(id_usuario):
     with conectar_banco() as conexao:
         cursor = conexao.cursor()
@@ -496,7 +467,7 @@ def sistema_dieta(id_usuario):
                         conexao.commit()
                         st.rerun()
 
-# Sistema Principal/Usuário
+
 def sistema(email):
     with conectar_banco() as conexao:
         cursor = conexao.cursor()
@@ -604,9 +575,6 @@ def sistema(email):
     return
 
 
-# Momento Streamlit - Andrei
-
-# Sistema Inicial/Login
 st.set_page_config("Metas Fitness", layout="wide")
 st.title("🏃‍♂️💪 FitLife")
 st.caption("Acompanhe sua rotina de exercícios e dietas.")
