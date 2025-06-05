@@ -490,10 +490,12 @@ def sistema(email):
 
         if usuario_obj.calcular_imc() < 18.5:
             st.info("🔵 IMC abaixo do ideal, Você está com baixo peso!")
-        elif usuario_obj.calcular_imc() > 24.9:
-            st.info("🔴 IMC acima do ideal, Você está com sobrepeso/obesidade!")
-        else:
+        elif usuario_obj.calcular_imc() > 18.5 and usuario_obj.calcular_imc() < 24.9:
             st.info("🟢 IMC ideal! Você está em boa forma!")
+        elif usuario_obj.calcular_imc() > 24.9 and usuario_obj.calcular_imc() < 29.9:
+            st.info("🔴 IMC acima do ideal, Você está com sobrepeso!")
+        elif usuario_obj.calcular_imc() > 29.9:
+            st.info("⚠️🔴 IMC muito acima do ideal, Você está com obesidade!")
 
         st.markdown("---")
 
